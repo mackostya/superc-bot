@@ -1,0 +1,7 @@
+venv*
+users.json
+log.txt
+imgs/*.png
+chromedriver*
+test_bot.py
+token.txt
