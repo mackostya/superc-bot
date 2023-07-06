@@ -1,6 +1,6 @@
 venv*
-users.json
-log.txt
+users*
+log*
 imgs/*.png
 chromedriver*
 test_bot.py
