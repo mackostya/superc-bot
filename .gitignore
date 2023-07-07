@@ -5,3 +5,4 @@ imgs/*.png
 chromedriver*
 test_bot.py
 token.txt
+screen.png

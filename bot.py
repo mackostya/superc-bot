@@ -9,6 +9,13 @@ import json
 import random
 import urllib3
 
+
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
@@ -22,9 +29,9 @@ USERS_FILE = "users.json"
 
 URL1 = "https://termine.staedteregion-aachen.de/auslaenderamt/"
 URL2 = "https://termine.staedteregion-aachen.de/auslaenderamt/select2?md=1"
-URL3 = "https://termine.staedteregion-aachen.de/auslaenderamt/suggest?cnc-191=1&loc=28"
+URL3 = "https://termine.staedteregion-aachen.de/auslaenderamt/suggest?mdt=75&select_cnc=1&cnc-204=0&cnc-205=0&cnc-198=0&cnc-201=0&cnc-202=0&cnc-227=0&cnc-189=0&cnc-203=0&cnc-196=0&cnc-190=0&cnc-185=0&cnc-187=0&cnc-188=0&cnc-186=0&cnc-192=0&cnc-191=1&cnc-194=0&cnc-197=0&cnc-193=0&cnc-183=0&cnc-184=0&cnc-195=0&cnc-200=0&cnc-225=0"
 
-DEFAULT_TITLE_RESPONSE = " Schritt 3: Keine Terminvorschläge verfügbar "
+DEFAULT_TITLE_RESPONSE = " Schritt 3 von 5 : Terminvorschläge - Keine Zeiten verfügbar "
 DEFAULT_TEXT = "Für die aktuelle Anliegenauswahl ist leider kein Termin verfügbar. Neue Termine werden täglich freigeschaltet. Bitte versuchen Sie die Terminbuchung zu einem späteren Zeitpunkt erneut."
 
 TIME_SLEEP_BTW_URLS = 5
@@ -58,23 +65,35 @@ class ScheduleTask(threading.Thread):
 class CheckAppointmentsTask(threading.Thread):
     def __init__(self):
         super(CheckAppointmentsTask, self).__init__(name="CheckAppointmentsThread")
+        self.options = Options()
+        self.options.add_argument("--headless=new")
+        self.service = Service(executable_path="/usr/bin/chromedriver")
         
-    def get_from_web(self):
+    def get_from_web_selenium(self):
         try:
-            with requests.Session() as s:
-                s.get(URL1)
-                time.sleep(TIME_SLEEP_BTW_URLS)
-                
-                s.get(URL2)
-                time.sleep(TIME_SLEEP_BTW_URLS)
-                
-                page = s.get(URL3)
-                s.close()
+            driver = webdriver.Chrome(service = self.service, options=self.options)
+            driver.get(URL1)
+            time.sleep(3)
+            
+            cookie = driver.find_element(by="id", value="cookie_msg_btn_yes")
+            cookie.click()
+            time.sleep(2)
+
+            driver.get(URL2)
+            time.sleep(2)
+
+            driver.get(URL3)
+            WebDriverWait(driver, 20).until(expected_conditions.visibility_of_element_located((By.NAME, "select_location")))
+            element = driver.find_element(by=By.NAME, value="select_location")
+            element.click()
+            time.sleep(2)
+            page = driver.page_source
+            driver.quit()
         except Exception as e:
-            write_to_file(f"\n\nWhile getting the data from web an Exceptionoccured: {e}\n\n")
+            write_to_file(f"\n\nWhile getting the data from web an Exception occured: {e}\n\n")
             return DEFAULT_TITLE_RESPONSE, DEFAULT_TEXT
         
-        soup = BeautifulSoup(page.content, "html.parser")
+        soup = BeautifulSoup(page, "html.parser")
         inhalt = soup.find(id="inhalt")
         title_element = inhalt.find("h1")
         
@@ -120,11 +139,12 @@ class CheckAppointmentsTask(threading.Thread):
         while flag:
             date = str(datetime.datetime.now())
             write_to_file(date + " : " + "Attemptig to get data")
-            title, text = self.get_from_web()
+            title, text = self.get_from_web_selenium()
             write_to_file(date + " : " + "Got title: " + str(title))
             if self.is_non_default_output(title, text):
                 write_to_file(date + " : " + title)
                 self.send_OMG_message()
+            print("Sleeping for 2-4 minutes")
             time_to_wait = random.randint(120, 240) # between 2 and 4 minutes
             time.sleep(time_to_wait)
 
@@ -148,12 +168,15 @@ def add_user_to_json(message):
         with open(USERS_FILE, "r") as file:
             d = json.load(file)
     with open(USERS_FILE, "w") as file:
-        d[message.from_user.username] = message.from_user.id
+        if (message.from_user.username == None) or (message.from_user.username == "") or (message.from_user.username == "null"):
+            d["noname_" + str(random.randint(4,100000))] = message.from_user.id
+        else:
+            d[message.from_user.username] = message.from_user.id
         json_object = json.dumps(d)
         file.write(json_object)
 
-def add_user(message, already_in_use = False):
-    chat_ids[message.from_user.id] = already_in_use
+def add_user(message, start_to_check = True):
+    chat_ids[message.from_user.id] = start_to_check
     date = str(datetime.datetime.now())
     txt = f"""
     ===== we have a new user! =====
@@ -174,13 +197,23 @@ def add_user(message, already_in_use = False):
 def send_welcome(message):
     if message.from_user.id not in chat_ids:
         add_user(message)
-    bot.reply_to(message, "Hi, I am your assistant for the appointments at SuperC Ausländeramt. I am now searching for the appointments for you. \
+        bot.reply_to(message, "Hi, I am your assistant for the appointments at SuperC Ausländeramt. I am now searching for the appointments for students. \
+I check if there are any updates on the website every 2-4 minutes.\n\
+If you want me to stop sending you updates just write /stop.\n\
+If you want me to restart, after you've stopped me, please write /restart.\n\
+I hope I will be able to help you:)")
+    else:
+        bot.reply_to(message, "Hey, I think we've already met :)\nIf you want to know what I can do, please write /help")
+
+@bot.message_handler(commands=['help'])
+def send_help(message):
+    bot.reply_to(message, "Here is what you need to know: \
 I check if there are any updates on the website every 2-4 minutes.\n\
 If you want to stop sending just write /stop.\n\
-If you want me to restart, after you've stopped me, please write /start_checking.\n\
+If you want me to restart, after you've stopped me, please write /restart.\n\
 I hope I will be able to help you:)")
 
-@bot.message_handler(commands=['start_checking'])
+@bot.message_handler(commands=['restart'])
 def loop(message):
     global flag
     flag = True
@@ -207,7 +240,11 @@ def start_admin_update(message):
 def finish_admin_update(message):
     for id in chat_ids.keys():
         try:
-            bot.send_message(chat_id=id, text='I am finished with an update, and I am glad to be searching for appointments for you.\n\nAfter this update I do not run the script every 30s but every 2 to 4 minutes. Furthermore I hope to be more robust now.\n\nIf you want me to search, please type \n/start_checking\nonce again :)\n\nBTW, sorry for the inconvenience with multiple restarts:)')
+            bot.send_message(chat_id=id, text='I am finished with an update, and I am glad to be searching for appointments for you.\n\n \
+After this update I can tackle the new website changes, so I hope I will be able to help you even more:)\n \
+BTW, for some of you I stopped working after a while, highly probable because you got replaced by other users :(\
+This should not be the problem now, I hope. I changed:)\
+If you forget the commands, just write /help, but I mean, it is pretty straight forward :)')
         except telebot.apihelper.ApiTelegramException:
             write_to_file("id: " + str(id) + " was blocking the sending")
 @bot.message_handler(commands=['admin_stop'])
