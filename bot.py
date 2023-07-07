@@ -16,7 +16,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
 BOT_TOKEN="YOUR_TOKEN_HERE"
@@ -101,23 +100,6 @@ class CheckAppointmentsTask(threading.Thread):
         text_element = main.find(string = DEFAULT_TEXT)
         
         return title_element.text, str(text_element)
-
-    def get_from_web_playwright(self):
-        with sync_playwright() as p:
-            browser = p.chromium.launch()
-            page = browser.new_page()
-            page.goto(URL1)
-            page.get_by_role("button").get_by_text("Akzeptieren").click()
-            page.get_by_role("button").get_by_text("Aufenthaltsangelegenheiten").click()
-            page.get_by_role("tablist").get_by_text("RWTH - Außenstelle Super C").click()
-            page.locator("#button-plus-191").click()
-            page.locator("#WeiterButton").click()
-            page.get_by_role("button").get_by_text("OK").click()
-            time.sleep(3)
-            # page.screenshot(path=f'imgs/screenshot.png', full_page=True)
-            title_text = page.locator("#inhalt").get_by_text("Schritt 3").text_content()
-            browser.close()
-            return title_text
         
     def send_OMG_message(self):
         for id in chat_ids.keys():
