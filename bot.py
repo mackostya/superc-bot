@@ -126,7 +126,6 @@ class CheckAppointmentsTask(threading.Thread):
             if self.is_non_default_output(title, text):
                 write_to_file(date + " : " + title)
                 self.send_OMG_message()
-            print("Sleeping for 2-4 minutes")
             time_to_wait = random.randint(120, 240) # between 2 and 4 minutes
             time.sleep(time_to_wait)
 
