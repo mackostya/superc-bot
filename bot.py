@@ -8,7 +8,7 @@ import datetime
 import json
 import random
 import urllib3
-
+from telebot import types
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -241,30 +241,76 @@ def stop(message):
     write_to_file(f"{message.from_user.first_name} wanted to stop:(")
     bot.reply_to(message, "I will not be sending you any updates to this topic anymore😢")
 
+@bot.message_handler(regexp='Helpful')
+def helpful(message):
+    print(message.from_user.id)
+    markup = types.ReplyKeyboardRemove(selective=False)
+    write_to_file(f"{message.from_user.first_name} found bot helpful:)")
+    bot.send_message(message.from_user.id, "Thank you for your feedback! I'm glad I could help you!", reply_markup=markup)
+    
+@bot.message_handler(regexp='Not that much')
+def not_helpul(message):
+    print(message.from_user.id)
+    markup = types.ReplyKeyboardRemove(selective=False)
+    write_to_file(f"{message.from_user.first_name} found bot not helpful:(")
+    bot.send_message(message.from_user.id, "Hope my code will be of some help then:)", reply_markup=markup)
+
 #####################################################################################
 ###################################### MAIN #########################################
 #####################################################################################
 
+#---------------------------      BYE MESSAGE      ---------------------------------#
+def send_bye_message():
+    markup = types.ReplyKeyboardMarkup(row_width=2)
+    itembtn1 = types.KeyboardButton('Helpful')
+    itembtn2 = types.KeyboardButton('Not that much:(')
+    markup.add(itembtn1, itembtn2)
+
+    msg =  "Thanks a lot for using me (the bot). \
+Since I already achieved my goal in supplying my author and my authors friends with \
+appointments, I finally can rest :) I hope I could as well help some of you, unknown \
+guests!\n\
+If you are still in need of an appointment, please take a look at me on github: \n\n\
+https://github.com/mackostya/superc-bot \n\n\
+If you found this bot helpful, please don't hesitate to choose the corresponding box for it and like me \
+on github. It will help my author to understand if he should continue developing this type of software or not.\
+"
+    for id in chat_ids.keys():
+        try:
+            bot.send_message(chat_id=id, text=msg, reply_markup=markup)
+        except telebot.apihelper.ApiTelegramException:
+            write_to_file("id: " + str(id) + " was blocking the sending")
+    telebot.apihelper.RETRY_ON_ERROR = True
+    bot.infinity_polling(timeout=60, long_polling_timeout = 30)
+
+#-----------------------------------------------------------------------------------#
+
 if __name__=="__main__":
+    SEND_BYE = True
     write_to_file("Starting a bot")
     init_chat_ids()
-    ScheduleTask()
-    while True:
-        try:
-            check_task = CheckAppointmentsTask()
-            check_task.start()
-            telebot.apihelper.RETRY_ON_ERROR = True
-            bot.infinity_polling(timeout=60, long_polling_timeout = 30)
-            assert True==False, "The end of the code was achieved, something went wrong"
-        except requests.exceptions.ConnectionError or urllib3.exceptions.MaxRetryError:
-            check_task.join()
-            bot.stop_polling()
-            write_to_file(f"Connection error occured, restarting the bot in 30 seconds")
-            time.sleep(30)
-        except Exception as e:
-            check_task.join()
-            bot.stop_polling()
-            write_to_file(f"Error occured: {e}, restarting the bot in 30 seconds")
-            time.sleep(30)
+    if SEND_BYE:
+        # last message :(
+        send_bye_message()
+    else:
+        # normal working day :)
+        ScheduleTask()
+        while True:
+            try:
+                check_task = CheckAppointmentsTask()
+                check_task.start()
+                telebot.apihelper.RETRY_ON_ERROR = True
+                bot.infinity_polling(timeout=60, long_polling_timeout = 30)
+                assert True==False, "The end of the code was achieved, something went wrong"
+            except requests.exceptions.ConnectionError or urllib3.exceptions.MaxRetryError:
+                check_task.join()
+                bot.stop_polling()
+                write_to_file(f"Connection error occured, restarting the bot in 30 seconds")
+                time.sleep(30)
+            except Exception as e:
+                check_task.join()
+                bot.stop_polling()
+                write_to_file(f"Error occured: {e}, restarting the bot in 30 seconds")
+                time.sleep(30)
 
             
