@@ -1,16 +1,17 @@
 import logging
+import click
 
 from functools import partial
-from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler
 
 from src.chat_members import ChatMembers
-from src.tasks.check_appointments_task import CheckAppointmentsTask
-from src.tasks.schedule_task import ScheduleTask
+from src import CheckAppointmentsTask, ScheduleTask
 from src.commands.commands import start, help, restart, stop, start_admin_update, finish_admin_update
 
 
-def main():
+@click.command()
+@click.option("--bot-type", default="RWTH", help="Type of the bot: RWTH or CIT.")
+def main(bot_type: str):
     logging.basicConfig(
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         level=logging.INFO,
@@ -46,7 +47,7 @@ def main():
     schedule_task = ScheduleTask(bot=application.bot, chat_members=chat_members)
     schedule_task.start()
 
-    check_task = CheckAppointmentsTask(bot=application.bot, chat_members=chat_members)
+    check_task = CheckAppointmentsTask(bot=application.bot, chat_members=chat_members, bot_type=bot_type)
     check_task.start()
 
     application.run_polling()

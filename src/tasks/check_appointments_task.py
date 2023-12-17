@@ -12,21 +12,34 @@ from bs4 import BeautifulSoup
 
 from src.chat_members import ChatMembers
 from src.utils import send_message
-
-URL1 = "https://termine.staedteregion-aachen.de/auslaenderamt/"
-URL2 = "https://termine.staedteregion-aachen.de/auslaenderamt/select2?md=1"
-URL3 = "https://termine.staedteregion-aachen.de/auslaenderamt/location?mdt=78&select_cnc=1&cnc-204=0&cnc-205=0&cnc-198=0&cnc-201=0&cnc-202=0&cnc-227=0&cnc-232=0&cnc-203=0&cnc-196=0&cnc-190=0&cnc-185=0&cnc-187=0&cnc-188=0&cnc-186=0&cnc-192=0&cnc-191=1&cnc-194=0&cnc-197=0&cnc-193=0&cnc-183=0&cnc-184=0&cnc-195=0&cnc-200=0&cnc-228=0"
-
-DEFAULT_TITLE_RESPONSE = " Schritt 4 von 6: Terminvorschläge - Keine Zeiten verfügbar "
-DEFAULT_TEXT = "Für die aktuelle Anliegenauswahl ist leider kein Termin verfügbar. Neue Termine werden täglich freigeschaltet. Bitte versuchen Sie die Terminbuchung zu einem späteren Zeitpunkt erneut."
-
-TIME_SLEEP_BTW_URLS = 5
-TIME_SLEEP_BTW_RQSTS = 30
+from configs.config import (
+    URL_CIT_1,
+    URL_CIT_2,
+    URL_CIT_3,
+    URL_RWTH_1,
+    URL_RWTH_2,
+    URL_RWTH_3,
+    DEFAULT_TITLE_RESPONSE,
+    DEFAULT_TEXT,
+)
 
 
 class CheckAppointmentsTask(threading.Thread):
-    def __init__(self, bot, chat_members: ChatMembers):
-        super(CheckAppointmentsTask, self).__init__(name="CheckAppointmentsThread")
+    def __init__(self, bot, chat_members: ChatMembers, bot_type: str):
+        super(CheckAppointmentsTask, self).__init__(name="CheckAppointmentsTask")
+        self.bot_type = bot_type
+        logging.info(f"Starting {self.bot_type} task")
+
+        if self.bot_type == "RWTH":
+            self.url_1 = URL_RWTH_1
+            self.url_2 = URL_RWTH_2
+            self.url_3 = URL_RWTH_3
+        elif self.bot_type == "CIT":
+            self.url_1 = URL_CIT_1
+            self.url_2 = URL_CIT_2
+            self.url_3 = URL_CIT_3
+        else:
+            raise ValueError(f"Bot type {self.bot_type} is not supported")
 
         self.bot = bot
         self.chat_members = chat_members
@@ -39,20 +52,19 @@ class CheckAppointmentsTask(threading.Thread):
     def get_from_web_selenium(self):
         try:
             driver = webdriver.Chrome(service=self.service, options=self.options)
-            driver.get(URL1)
+            driver.get(self.url_1)
             time.sleep(3)
             cookie = driver.find_element(by="id", value="cookie_msg_btn_yes")
             cookie.click()
             time.sleep(2)
-            driver.get(URL2)
+            driver.get(self.url_2)
             time.sleep(2)
 
-            driver.get(URL3)
+            driver.get(self.url_3)
             element = driver.find_element(by="id", value="suggest_location_content")
             element = element.find_element(by=By.NAME, value="select_location")
             element.click()
             driver.save_screenshot("imgs/screenshot.png")
-            # WebDriverWait(driver, 20).until(expected_conditions.visibility_of_element_located((By.NAME, "select_location")))
             time.sleep(2)
             page = driver.page_source
             driver.quit()
@@ -99,7 +111,7 @@ class CheckAppointmentsTask(threading.Thread):
             logging.info("Got title: " + str(title))
             if self.is_non_default_output(title, text):
                 logging.info(title)
-                text = f"OMG, there is a new appointment, go check right now!!!\n{URL1}"
+                text = f"OMG, there is a new appointment, go check right now!!!\n{self.url_1}"
                 self._send_message_to_all(text)
             time_to_wait = random.randint(120, 240)  # between 2 and 4 minutes
             time.sleep(time_to_wait)
