@@ -23,7 +23,7 @@ I hope I will be able to help you:)"
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_message = "Here is what you need to know: \
 I check if there are any updates on the website every 2-4 minutes.\n\
-/stop - if you want to stop sending you updates.\n\
+/stop - if you want me to stop sending you updates.\n\
 /restart - if you want me to restart, after you've stopped me.\n\
 I hope I will be able to help you:)"
     await context.bot.send_message(chat_id=update.effective_chat.id, text=reply_message)
