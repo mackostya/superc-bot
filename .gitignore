@@ -6,3 +6,5 @@ chromedriver*
 test_bot.py
 token.txt
 screen.png
+__pycache__
+test.py

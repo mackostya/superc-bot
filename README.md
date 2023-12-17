@@ -14,3 +14,11 @@ Recommendation: Use a virtual environment for the installation (`python -m venv 
 ## Usage
 
 If you want to use another implementation, look into **test_playwright.py** or **test_selenium.py**. Mark: those libraries are not perfectly suitable for the RaspberryPi 3B+, that is why the main bot is written with **requests**. 
+
+## Chromedriver
+
+Install chromedriver:
+    
+```
+brew install --cask chromedriver
+```
