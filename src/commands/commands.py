@@ -13,7 +13,7 @@ async def start(chat_members: ChatMembers, update: Update, context: ContextTypes
         reply_message = "Hi, I am your assistant for the appointments at SuperC Ausländeramt. I am now searching for the appointments for students. \
 I check if there are any updates on the website every 2-4 minutes.\n\
 /stop - if you want me to stop sending you updates just write.\n\
-/restart - if you want me to restart, after you've stopped me, please write.\n\
+/restart - if you want me to restart, after you've stopped me.\n\
 I hope I will be able to help you:)"
     else:
         reply_message = "Hey, I think we've already met :)\nIf you want to know what I can do, please write /help"
@@ -24,7 +24,7 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_message = "Here is what you need to know: \
 I check if there are any updates on the website every 2-4 minutes.\n\
 /stop - if you want to stop sending just write.\n\
-/restart - if you want me to restart, after you've stopped me, please write /restart.\n\
+/restart - if you want me to restart, after you've stopped me.\n\
 I hope I will be able to help you:)"
     await context.bot.send_message(chat_id=update.effective_chat.id, text=reply_message)
 
