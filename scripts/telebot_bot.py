@@ -18,7 +18,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 
-BOT_TOKEN = "6845339206:AAHJM6O4uIMbo1QJBicKn_fpiu7ZbyK9GJc"
+BOT_TOKEN = ""
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
