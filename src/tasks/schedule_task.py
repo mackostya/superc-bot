@@ -11,7 +11,7 @@ from src.utils import send_message
 class ScheduleTask(threading.Thread):
     def __init__(self, bot, chat_members: ChatMembers):
         super(ScheduleTask, self).__init__(name="GoodMorningThread")
-        schedule.every().day.at("08:32").do(self.send_daily_message)
+        schedule.every().day.at("08:00").do(self.send_daily_message)
         self.bot = bot
         self.chat_members = chat_members
 
