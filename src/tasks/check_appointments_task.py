@@ -3,6 +3,7 @@ import threading
 import random
 import asyncio
 import logging
+import getpass
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -86,27 +87,26 @@ class CheckAppointmentsTask(threading.Thread):
         return title_element.text, str(text_element)
 
     def _send_message_to_all(self, text: str):
-        if not self._already_sent:
-            chat_ids = self.chat_members.get_chat_ids()
-            loop = asyncio.new_event_loop()
-            for id in chat_ids.keys():
-                if chat_ids[id]:
-                    try:
-                        loop.run_until_complete(send_message(self.bot, id, text))
-                    except Exception as e:
-                        logging.error(f"Could not send message to {id}, due to: {e}")
-            time.sleep(10)
-            loop.close()
-            self._already_sent = True
+        chat_ids = self.chat_members.get_chat_ids()
+        loop = asyncio.new_event_loop()
+        for id in chat_ids.keys():
+            if chat_ids[id]:
+                try:
+                    loop.run_until_complete(send_message(self.bot, id, text))
+                except Exception as e:
+                    logging.error(f"Could not send message to {id}, due to: {e}")
+        time.sleep(10)
+        loop.close()
 
     def is_non_default_output(self, title: str, text: str):
         if (title != DEFAULT_TITLE_RESPONSE) or (text != DEFAULT_TEXT):
             return True
         else:
             if self._already_sent:
+                logging.info("No appointmetns available anymore:(")
                 text = "No appointmetns available anymore:(\nI will let you know when there will be some."
                 self._send_message_to_all(text)
-            self._already_sent = False
+                self._already_sent = False
             return False
 
     def run(self):
@@ -115,8 +115,10 @@ class CheckAppointmentsTask(threading.Thread):
             title, text = self.get_from_web_selenium()
             logging.info("Got title: " + str(title))
             if self.is_non_default_output(title, text):
-                logging.info(title)
+                logging.info("Appointment available! {title}")
                 text = f"OMG, there is a new appointment, go check right now!!!\n{self.url_1}"
-                self._send_message_to_all(text)
+                if not self._already_sent:
+                    self._send_message_to_all(text)
+                    self._already_sent = True
             time_to_wait = random.randint(120, 240)  # between 2 and 4 minutes
             time.sleep(time_to_wait)
