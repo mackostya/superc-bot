@@ -11,7 +11,7 @@ from src.utils import send_message
 class ScheduleTask(threading.Thread):
     def __init__(self, bot, chat_members: ChatMembers):
         super(ScheduleTask, self).__init__(name="GoodMorningThread")
-        schedule.every().day.at("08:26").do(self.send_daily_message)
+        schedule.every().day.at("08:30").do(self.send_daily_message)
         self.bot = bot
         self.chat_members = chat_members
 
@@ -24,6 +24,7 @@ class ScheduleTask(threading.Thread):
                 loop.run_until_complete(send_message(self.bot, id, text))
             except Exception as e:
                 logging.error(f"Could not send message to {id}, due to: {e}")
+        time.sleep(10)
         loop.close()
 
     def run(self):

@@ -40,4 +40,4 @@ async def send_message(bot, chat_id: int, text: str):
         chat_id=chat_id,
         text=text,
     )
-    asyncio.sleep(5)
+    # asyncio.sleep(5)

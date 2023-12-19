@@ -91,6 +91,7 @@ class CheckAppointmentsTask(threading.Thread):
                         loop.run_until_complete(send_message(self.bot, id, text))
                     except Exception as e:
                         logging.error(f"Could not send message to {id}, due to: {e}")
+            time.sleep(10)
             loop.close()
             self._already_sent = True
 
