@@ -47,7 +47,11 @@ class CheckAppointmentsTask(threading.Thread):
 
         self.options = Options()
         self.options.add_argument("--headless=new")
-        self.service = Service(executable_path="/usr/local/bin/chromedriver")
+        if getpass.getuser() == "mackostya":
+            executable_path = "/usr/bin/chromedriver"
+        else:
+            executable_path = "/usr/local/bin/chromedriver"
+        self.service = Service(executable_path=executable_path)
 
     def get_from_web_selenium(self):
         try:
