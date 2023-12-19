@@ -3,6 +3,7 @@ import json
 import random
 from telegram import Update
 import logging
+import asyncio
 
 
 def init_chat_ids(users_file: str):
@@ -39,3 +40,4 @@ async def send_message(bot, chat_id: int, text: str):
         chat_id=chat_id,
         text=text,
     )
+    asyncio.sleep(5)
