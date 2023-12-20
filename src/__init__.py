@@ -1,2 +1,4 @@
 from .tasks.check_appointments_task import CheckAppointmentsTask
+from .tasks.async_check_appointments_task import AsyncCheckAppointmentsTask
 from .tasks.schedule_task import ScheduleTask
+from .tasks.async_schedule_task import AsyncScheduleTask

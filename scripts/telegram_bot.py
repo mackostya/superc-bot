@@ -5,7 +5,7 @@ from functools import partial
 from telegram.ext import ApplicationBuilder, CommandHandler
 
 from src.chat_members import ChatMembers
-from src import CheckAppointmentsTask, ScheduleTask
+from src import CheckAppointmentsTask, ScheduleTask, AsyncCheckAppointmentsTask, AsyncScheduleTask
 from src.commands.commands import start, help, restart, stop, start_admin_update, finish_admin_update
 
 
@@ -44,10 +44,10 @@ def main(bot_type: str):
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.info("Starting a bot")
 
-    schedule_task = ScheduleTask(bot=application.bot, chat_members=chat_members)
+    schedule_task = AsyncScheduleTask(bot=application.bot, chat_members=chat_members)
     schedule_task.start()
 
-    check_task = CheckAppointmentsTask(bot=application.bot, chat_members=chat_members, bot_type=bot_type)
+    check_task = AsyncCheckAppointmentsTask(bot=application.bot, chat_members=chat_members, bot_type=bot_type)
     check_task.start()
 
     application.run_polling()
