@@ -26,9 +26,10 @@ class AsyncScheduleTask(threading.Thread):
 
     async def async_task(self):
         while True:
-            time.sleep(1)
+            await asyncio.sleep(1)
             if time.strftime("%H:%M") == "08:00":
                 await self.async_send_daily_message()
+                await asyncio.sleep(60)
 
     def run(self):
         self.loop.run_until_complete(self.async_task())
