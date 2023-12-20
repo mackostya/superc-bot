@@ -53,6 +53,7 @@ class CheckAppointmentsTask(threading.Thread):
         else:
             executable_path = "/usr/local/bin/chromedriver"
         self.service = Service(executable_path=executable_path)
+        self.loop = asyncio.new_event_loop()
 
     def get_from_web_selenium(self):
         try:
@@ -88,11 +89,10 @@ class CheckAppointmentsTask(threading.Thread):
 
     def _send_message_to_all(self, text: str):
         chat_ids = self.chat_members.get_chat_ids()
-        loop = asyncio.new_event_loop()
         for id in chat_ids.keys():
             if chat_ids[id]:
                 try:
-                    loop.run_until_complete(send_message(self.bot, id, text))
+                    self.loop.run_until_complete(send_message(self.bot, id, text))
                 except Exception as e:
                     logging.error(f"Could not send message to {id}, due to: {e}")
         time.sleep(10)
@@ -114,7 +114,7 @@ class CheckAppointmentsTask(threading.Thread):
             title, text = self.get_from_web_selenium()
             logging.info("Got title: " + str(title))
             if self.is_non_default_output(title, text):
-                logging.info("Appointment available! {title}")
+                logging.info(f"Appointment available! {title}")
                 text = f"OMG, there is a new appointment, go check right now!!!\n{self.url_1}"
                 if not self._already_sent:
                     self._send_message_to_all(text)
