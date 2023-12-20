@@ -96,7 +96,6 @@ class CheckAppointmentsTask(threading.Thread):
                 except Exception as e:
                     logging.error(f"Could not send message to {id}, due to: {e}")
         time.sleep(10)
-        loop.close()
 
     def is_non_default_output(self, title: str, text: str):
         if (title != DEFAULT_TITLE_RESPONSE) or (text != DEFAULT_TEXT):
