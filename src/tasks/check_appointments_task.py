@@ -51,7 +51,7 @@ class CheckAppointmentsTask(threading.Thread):
         if getpass.getuser() == "mackostya":
             executable_path = "/usr/bin/chromedriver"
         else:
-            executable_path = "/usr/local/bin/chromedriver"
+            executable_path = "/usr/bin/chromedriver"
         self.service = Service(executable_path=executable_path)
         self.loop = asyncio.new_event_loop()
 
