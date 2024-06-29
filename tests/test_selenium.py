@@ -11,7 +11,7 @@ DEFAULT_TITLE = " Schritt 4 von 6: Terminvorschläge - Keine Zeiten verfügbar "
 DEFAULT_TEXT = "Für die aktuelle Anliegenauswahl ist leider kein Termin verfügbar. Neue Termine werden täglich freigeschaltet. Bitte versuchen Sie die Terminbuchung zu einem späteren Zeitpunkt erneut."
 URL_RWTH_1 = "https://termine.staedteregion-aachen.de/auslaenderamt/"
 URL_RWTH_2 = "https://termine.staedteregion-aachen.de/auslaenderamt/select2?md=1"
-URL_RWTH_3 = "https://termine.staedteregion-aachen.de/auslaenderamt/location?mdt=78&select_cnc=1&cnc-204=0&cnc-205=0&cnc-198=0&cnc-201=0&cnc-202=0&cnc-227=0&cnc-232=0&cnc-203=0&cnc-196=0&cnc-190=0&cnc-185=0&cnc-187=0&cnc-188=0&cnc-186=0&cnc-192=0&cnc-191=1&cnc-194=0&cnc-197=0&cnc-193=0&cnc-183=0&cnc-184=0&cnc-195=0&cnc-200=0&cnc-228=0"
+URL_RWTH_3 = "https://termine.staedteregion-aachen.de/auslaenderamt/location?mdt=88&select_cnc=1&cnc-270=0&cnc-271=0&cnc-264=0&cnc-267=0&cnc-268=0&cnc-272=0&cnc-255=0&cnc-269=0&cnc-262=0&cnc-256=0&cnc-253=0&cnc-254=0&cnc-274=0&cnc-252=0&cnc-258=0&cnc-257=1&cnc-260=0&cnc-263=0&cnc-259=0&cnc-249=0&cnc-250=0&cnc-261=0&cnc-266=0&cnc-265=0"
 
 URL_CIT_1 = "https://termine.staedteregion-aachen.de/auslaenderamt/"
 URL_CIT_2 = "https://termine.staedteregion-aachen.de/auslaenderamt/select2?md=2"
@@ -27,8 +27,9 @@ def test_rwth(type="RWTH"):
 
     options = Options()
     options.add_argument("--headless=new")
-    service = Service(executable_path="/usr/local/bin/chromedriver")
+    service = Service(executable_path="/usr/bin/chromedriver")
     driver = webdriver.Chrome(service=service, options=options)
+    
     driver.get(URL_RWTH_1 if type == "RWTH" else URL_CIT_1)
     time.sleep(3)  # Let the user actually see something!
     logging.info("Got first url")
@@ -67,4 +68,4 @@ def test_rwth(type="RWTH"):
 
 
 if __name__ == "__main__":
-    test_rwth("CIT")
+    test_rwth("RWTH")

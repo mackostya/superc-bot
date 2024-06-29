@@ -1,4 +1,5 @@
 venv*
+.venv
 users*
 log*
 imgs/*.png

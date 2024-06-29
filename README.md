@@ -17,8 +17,38 @@ If you want to use another implementation, look into **tests/test_playwright.py*
 
 ## Chromedriver
 
-Install chromedriver (MacOS):
+### MacOS
+
+Install chromedriver:
     
 ```
 brew install --cask chromedriver
 ```
+
+### RPI Ubuntu
+
+Install chromedriver on Ubuntu Server RPI3 ARM 64:
+
+```
+sudo apt-get install chromium-chromedriver
+```
+
+Check where is the chromedriver
+
+```
+which chromedriver
+```
+
+Example output **/usr/bin/chromedriver**
+
+Got to **/usr/bin/** and update the rights:
+
+```
+chmod 777 /usr/bin/chromedriver
+```
+
+Eventually maybe restart the RPI.
+
+For more information refer to:
+- [Blog](https://ivanderevianko.com/2020/01/selenium-chromedriver-for-raspberrypi)
+- [Stackoverflow](https://stackoverflow.com/questions/22476112/using-chromedriver-with-selenium-python-ubuntu)
