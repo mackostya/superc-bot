@@ -46,7 +46,16 @@ class AsyncCheckAppointmentsTask(threading.Thread):
         self._already_sent = False
 
         self.options = Options()
-        self.options.add_argument("--headless=new")
+        # self.options.add_argument("--headless=new")
+        # self.options.add_argument("--no-sandbox")
+        # self.options.add_argument("--disable-dev-shm-usage")
+        self.options.add_argument("start-maximized") # https://stackoverflow.com/a/26283818/1689770
+        self.options.add_argument("enable-automation") # https://stackoverflow.com/a/43840128/1689770
+        self.options.add_argument("--headless") # only if you are ACTUALLY running headless
+        self.options.add_argument("--no-sandbox") #https://stackoverflow.com/a/50725918/1689770
+        self.options.add_argument("--disable-dev-shm-usage") #https://stackoverflow.com/a/50725918/1689770
+        self.options.add_argument("--disable-browser-side-navigation") #https://stackoverflow.com/a/49123152/1689770
+        self.options.add_argument("--disable-gpu")
         if getpass.getuser() == "mackostya":
             executable_path = "/usr/bin/chromedriver"
         else:
