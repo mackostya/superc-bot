@@ -78,20 +78,24 @@ class AsyncCheckAppointmentsTask(threading.Thread):
             element = driver.find_element(by="id", value="suggest_location_content")
             element = element.find_element(by=By.NAME, value="select_location")
             element.click()
-            driver.save_screenshot("imgs/screenshot.png")
+            # driver.save_screenshot("imgs/screenshot.png")
             await asyncio.sleep(2)
             page = driver.page_source
             driver.quit()
         except Exception as e:
             logging.info(f"\n\nWhile getting the data from web an Exception occured: {e}\n\n")
             return DEFAULT_TITLE_RESPONSE, DEFAULT_TEXT
+        
+        try:
+            soup = BeautifulSoup(page, "html.parser")
+            inhalt = soup.find(id="inhalt")
+            title_element = inhalt.find("h1")
+            main = soup.find("main")
+            text_element = main.find(string=DEFAULT_TEXT)
+        except Exception as e:
+            logging.info(f"\n\nWhile decoding the page an Exception occured: {e}\n\n")
+            return DEFAULT_TITLE_RESPONSE, DEFAULT_TEXT
 
-        soup = BeautifulSoup(page, "html.parser")
-        inhalt = soup.find(id="inhalt")
-        title_element = inhalt.find("h1")
-
-        main = soup.find("main")
-        text_element = main.find(string=DEFAULT_TEXT)
 
         return title_element.text, str(text_element)
 
