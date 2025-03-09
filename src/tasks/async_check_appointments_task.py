@@ -130,7 +130,7 @@ class AsyncCheckAppointmentsTask(threading.Thread):
                 if not self._already_sent:
                     await self._async_send_message_to_all(text)
                     self._already_sent = True
-            time_to_wait = random.randint(120, 240)  # between 2 and 4 minutes
+            time_to_wait = random.randint(60, 120)  # between 2 and 4 minutes
             await asyncio.sleep(time_to_wait)
 
     def run(self):
