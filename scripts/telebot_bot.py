@@ -125,7 +125,7 @@ class CheckAppointmentsTask(threading.Thread):
         flag = True
         while flag:
             date = str(datetime.datetime.now())
-            write_to_file(date + " : " + "Attemptnig to get data")
+            write_to_file(date + " : " + "Attempting to get data")
             title, text = self.get_from_web_selenium()
             write_to_file(date + " : " + "Got title: " + str(title))
             if self.is_non_default_output(title, text):

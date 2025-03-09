@@ -121,7 +121,7 @@ class AsyncCheckAppointmentsTask(threading.Thread):
 
     async def async_task(self):
         while True:
-            logging.info("Attemptig to get data")
+            logging.info("Attempting to get data")
             title, text = await self.async_get_from_web_selenium()
             logging.info("Got title: " + str(title))
             if await self.async_is_non_default_output(title, text):

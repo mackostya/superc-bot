@@ -110,7 +110,7 @@ class CheckAppointmentsTask(threading.Thread):
 
     def run(self):
         while True:
-            logging.info("Attemptig to get data")
+            logging.info("Attempting to get data")
             title, text = self.get_from_web_selenium()
             logging.info("Got title: " + str(title))
             if self.is_non_default_output(title, text):
