@@ -5,7 +5,7 @@ from functools import partial
 from telegram.ext import ApplicationBuilder, CommandHandler
 
 from src.chat_members import ChatMembers
-from src import CheckAppointmentsTask, ScheduleTask, AsyncCheckAppointmentsTask, AsyncScheduleTask
+from src import AsyncCheckAppointmentsTask, AsyncScheduleTask
 from src.commands.commands import start, help, restart, stop, start_admin_update, finish_admin_update
 
 
