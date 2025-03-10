@@ -80,7 +80,7 @@ class AsyncCheckAppointmentsTask(threading.Thread):
             element.click()
             # driver.save_screenshot("imgs/screenshot.png")
             await asyncio.sleep(2)
-            page = self.driver.page_source
+            page = driver.page_source
         except Exception as e:
             logging.info(f"\n\nWhile getting the data from web an Exception occured: {e}\n\n")
             return DEFAULT_TITLE_RESPONSE, DEFAULT_TEXT
