@@ -2,7 +2,8 @@ import threading
 import random
 import asyncio
 import logging
-import getpass
+import platform
+import gc
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -56,11 +57,12 @@ class AsyncCheckAppointmentsTask(threading.Thread):
         self.options.add_argument("--disable-dev-shm-usage") #https://stackoverflow.com/a/50725918/1689770
         self.options.add_argument("--disable-browser-side-navigation") #https://stackoverflow.com/a/49123152/1689770
         self.options.add_argument("--disable-gpu")
-        if getpass.getuser() == "mackostya":
-            executable_path = "/usr/bin/chromedriver"
+
+        if platform.system() == "Darwin":
+            self.executable_path = "/usr/local/bin/chromedriver"
         else:
-            executable_path = "/usr/bin/chromedriver"
-        self.service = Service(executable_path=executable_path)
+            self.executable_path = "/usr/bin/chromedriver"
+        self.service = Service(executable_path=self.executable_path)
         self.loop = asyncio.new_event_loop()
 
     async def async_get_from_web_selenium(self):
