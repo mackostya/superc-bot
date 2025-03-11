@@ -50,43 +50,55 @@ class AsyncCheckAppointmentsTask(threading.Thread):
         # self.options.add_argument("--headless=new")
         # self.options.add_argument("--no-sandbox")
         # self.options.add_argument("--disable-dev-shm-usage")
-        self.options.add_argument("start-maximized") # https://stackoverflow.com/a/26283818/1689770
-        self.options.add_argument("enable-automation") # https://stackoverflow.com/a/43840128/1689770
-        self.options.add_argument("--headless") # only if you are ACTUALLY running headless
-        self.options.add_argument("--no-sandbox") #https://stackoverflow.com/a/50725918/1689770
-        self.options.add_argument("--disable-dev-shm-usage") #https://stackoverflow.com/a/50725918/1689770
-        self.options.add_argument("--disable-browser-side-navigation") #https://stackoverflow.com/a/49123152/1689770
+        self.options.add_argument("start-maximized")  # https://stackoverflow.com/a/26283818/1689770
+        self.options.add_argument("enable-automation")  # https://stackoverflow.com/a/43840128/1689770
+        self.options.add_argument("--headless")  # only if you are ACTUALLY running headless
+        self.options.add_argument("--no-sandbox")  # https://stackoverflow.com/a/50725918/1689770
+        self.options.add_argument("--disable-dev-shm-usage")  # https://stackoverflow.com/a/50725918/1689770
+        self.options.add_argument("--disable-browser-side-navigation")  # https://stackoverflow.com/a/49123152/1689770
         self.options.add_argument("--disable-gpu")
 
         if platform.system() == "Darwin":
             self.executable_path = "/usr/local/bin/chromedriver"
         else:
             self.executable_path = "/usr/bin/chromedriver"
-        self.service = Service(executable_path=self.executable_path)
         self.loop = asyncio.new_event_loop()
 
     async def async_get_from_web_selenium(self):
         try:
-            driver = webdriver.Chrome(service=self.service, options=self.options)
+            service = Service(executable_path=self.executable_path)
+            driver = webdriver.Chrome(service=service, options=self.options)
             driver.get(self.url_1)
             await asyncio.sleep(3)
+            logging.info("Got first url")
             cookie = driver.find_element(by="id", value="cookie_msg_btn_yes")
             cookie.click()
             await asyncio.sleep(2)
             driver.get(self.url_2)
             await asyncio.sleep(2)
-
+            logging.info("Got second url")
             driver.get(self.url_3)
+            logging.info("Got third url")
             element = driver.find_element(by="id", value="suggest_location_content")
             element = element.find_element(by=By.NAME, value="select_location")
             element.click()
+            logging.info("Element stuff")
             # driver.save_screenshot("imgs/screenshot.png")
             await asyncio.sleep(2)
             page = driver.page_source
+            await asyncio.sleep(2)
+            del driver
+            del service
+            gc.collect()
         except Exception as e:
             logging.info(f"\n\nWhile getting the data from web an Exception occured: {e}\n\n")
+            if driver:
+                del driver
+            if service:
+                del service
+            gc.collect()
             return DEFAULT_TITLE_RESPONSE, DEFAULT_TEXT
-        
+
         try:
             soup = BeautifulSoup(page, "html.parser")
             inhalt = soup.find(id="inhalt")
@@ -96,7 +108,6 @@ class AsyncCheckAppointmentsTask(threading.Thread):
         except Exception as e:
             logging.info(f"\n\nWhile decoding the page an Exception occured: {e}\n\n")
             return DEFAULT_TITLE_RESPONSE, DEFAULT_TEXT
-
 
         return title_element.text, str(text_element)
 
